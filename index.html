@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <!-- Google Font: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        /* Canvas nền sao lơ lửng */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Khung nội dung chính ở giữa */
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        /* Khung ảnh Kori lơ lửng */
+        .character-wrapper {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin-bottom: 24px;
+            animation: float 2.5s ease-in-out infinite;
+        }
+
+        .character-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* Blend viền đen của ảnh vào nền đen hoàn hảo */
+            mix-blend-mode: screen; 
+        }
+
+        /* Hiệu ứng hào quang phát sáng nhẹ sau lưng Kori */
+        .glow-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(30, 102, 255, 0.25) 0%, rgba(30, 102, 255, 0) 70%);
+            border-radius: 50%;
+            filter: blur(10px);
+            z-index: -1;
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+
+        /* Chữ Đang chuyển hướng */
+        .status-text {
+            font-size: 1.5rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        /* Dấu 3 chấm nhấp nháy chạy lần lượt */
+        .dots span {
+            display: inline-block;
+            animation: blink 1.4s infinite both;
+        }
+        .dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Liên kết dự phòng */
+        .fallback-link {
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .fallback-link:hover {
+            color: #1e6bff;
+        }
+
+        /* Hiệu ứng lơ lửng (Floating) */
+        @keyframes float {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-12px) rotate(1deg);
+            }
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+        }
+
+        /* Hiệu ứng mạch đập hào quang (Pulse) */
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.9);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(0.9);
+                opacity: 0.6;
+            }
+        }
+
+        /* Hiệu ứng nhấp nháy 3 chấm */
+        @keyframes blink {
+            0% {
+                opacity: 0.2;
+            }
+            20% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.2;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Canvas vẽ sao nền trời -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Nội dung chính -->
+    <div class="container">
+        <div class="character-wrapper">
+            <div class="glow-effect"></div>
+            <!-- Ảnh Kori chibi đang chạy đã gen -->
+            <img class="character-img" src="kori.jpg" alt="Kori Chibi Running">
+        </div>
+        <div class="status-text">
+            Redirecting to kirozxy.dev<span class="dots"><span>.</span><span>.</span><span>.</span></span>
+        </div>
+        <a class="fallback-link" href="https://kirozxy.dev/">Click here if you are not redirected automatically</a>
+    </div>
+
+    <script>
+        // --- 1. Tạo hiệu ứng sao lơ lửng (Canvas Starfield) ---
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        // Khởi tạo danh sách sao
+        const stars = [];
+        const numStars = 120;
+
+        for (let i = 0; i < numStars; i++) {
+            stars.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                radius: Math.random() * 1.5 + 0.2, // Kích thước sao nhỏ tinh tế
+                opacity: Math.random(),
+                speed: Math.random() * 0.05 + 0.02, // Tốc độ trôi lơ lửng rất chậm
+                factor: Math.random() * 0.02 + 0.01 // Tốc độ nhấp nháy
+            });
+        }
+
+        function animate() {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, width, height);
+
+            for (let i = 0; i < numStars; i++) {
+                const s = stars[i];
+                
+                // Cập nhật trạng thái nhấp nháy (lơ lửng)
+                s.opacity += s.factor;
+                if (s.opacity > 1 || s.opacity < 0.1) {
+                    s.factor = -s.factor;
+                }
+
+                // Sao trôi nhẹ sang phải để tạo hiệu ứng chạy của Kori
+                s.x -= s.speed * 4; // Trôi ngược hướng chạy của Kori (về bên trái)
+                if (s.x < 0) {
+                    s.x = width;
+                    s.y = Math.random() * height;
+                }
+
+                // Vẽ sao
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
+                ctx.shadowBlur = s.radius * 2;
+                ctx.shadowColor = '#ffffff';
+                ctx.fill();
+            }
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // --- 2. Tự động chuyển hướng sau 3 giây ---
+        setTimeout(() => {
+            window.location.href = "https://kirozxy.dev/";
+        }, 3000);
+    </script>
+</body>
+</html>
